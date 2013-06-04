@@ -1,0 +1,30 @@
+"""gevent_openssl - gevent compatibility with PyOpenSSL.
+
+Usage
+-----
+
+Instead of importing OpenSSL directly, do so in the following manner:
+
+..
+
+    from gevent_openssl import OpenSSL
+
+
+Any calls that would have blocked the current thread will now only block the
+current green thread.
+
+This compatibility is accomplished by ensuring the nonblocking flag is set
+before any blocking operation and the OpenSSL file descriptor is polled internally
+to trigger needed events.
+"""
+
+from OpenSSL import *
+import gevent_openssl.SSL as SSL
+
+
+def monkey_patch():
+    """
+    Monkey patches `OpenSSL.SSL`
+    """
+    mod = __import__('OpenSSL').SSL
+    mod.Connection = SSL.Connection
