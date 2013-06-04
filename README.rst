@@ -20,7 +20,14 @@ Instead of importing OpenSSL directly, do so in the following manner:
 
 ..
     
-    from gevent_openssl import Connection
+    import gevent_openssl as OpenSSL
+    
+or
+
+..
+    
+    import gevent_openssl; gevent_openssl.monkey_patch()
+
 
 
 Any calls that would have blocked the current thread will now only block the

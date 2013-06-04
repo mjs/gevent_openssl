@@ -6,9 +6,14 @@ Usage
 Instead of importing OpenSSL directly, do so in the following manner:
 
 ..
+    
+    import gevent_openssl as OpenSSL
+    
+or
 
-    from gevent_openssl import OpenSSL
-
+..
+    
+    import gevent_openssl; gevent_openssl.monkey_patch()
 
 Any calls that would have blocked the current thread will now only block the
 current green thread.
