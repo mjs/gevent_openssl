@@ -1,10 +1,7 @@
 """gevent_openssl.SSL - gevent compatibility with OpenSSL.SSL.
 """
 
-from sys import exc_clear
-from gevent.socket import wait_read
-from gevent.socket import wait_write
-from gevent.socket import wait_readwrite
+import sys
 from OpenSSL.SSL import *
 from OpenSSL.SSL import WantReadError
 from OpenSSL.SSL import WantWriteError
@@ -12,6 +9,18 @@ from OpenSSL.SSL import WantX509LookupError
 from OpenSSL.SSL import ZeroReturnError
 from OpenSSL.SSL import SysCallError
 from OpenSSL.SSL import Connection as __Connection__
+try:
+    from gevent.socket import wait_read
+    from gevent.socket import wait_write
+    from gevent.socket import wait_readwrite
+except ImportError:
+    import select
+    def wait_read(fd, timeout):
+        return select.select([fd], [], [fd], timeout)
+    def wait_write(fd, timeout):
+        return select.select([fd], [fd], [fd], timeout)
+    def wait_readwrite(fd, timeout):
+        return select.select([fd], [fd], [fd], timeout)
 
 
 class Connection(object):
@@ -37,7 +46,7 @@ class Connection(object):
                 self._connection.do_handshake()
                 break
             except (WantReadError, WantX509LookupError, WantWriteError):
-                exc_clear()
+                sys.exc_clear()
                 wait_readwrite(self._sock.fileno(), timeout=self._timeout)
 
     def connect(self, *args, **kwargs):
@@ -46,10 +55,10 @@ class Connection(object):
                 self._connection.connect(*args, **kwargs)
                 break
             except (WantReadError, WantX509LookupError):
-                exc_clear()
+                sys.exc_clear()
                 wait_read(self._sock.fileno(), timeout=self._timeout)
             except WantWriteError:
-                exc_clear()
+                sys.exc_clear()
                 wait_write(self._sock.fileno(), timeout=self._timeout)
 
     def send(self, data, flags=0):
@@ -58,10 +67,10 @@ class Connection(object):
                 self._connection.send(data, flags)
                 break
             except (WantReadError, WantX509LookupError):
-                exc_clear()
+                sys.exc_clear()
                 wait_read(self._sock.fileno(), timeout=self._timeout)
             except WantWriteError:
-                exc_clear()
+                sys.exc_clear()
                 wait_write(self._sock.fileno(), timeout=self._timeout)
             except SysCallError as e:
                 if e[0] == -1 and not data:
@@ -77,10 +86,10 @@ class Connection(object):
             try:
                 return self._connection.recv(bufsiz, flags)
             except (WantReadError, WantX509LookupError):
-                exc_clear()
+                sys.exc_clear()
                 wait_read(self._sock.fileno(), timeout=self._timeout)
             except WantWriteError:
-                exc_clear()
+                sys.exc_clear()
                 wait_write(self._sock.fileno(), timeout=self._timeout)
             except ZeroReturnError:
                 return ''
