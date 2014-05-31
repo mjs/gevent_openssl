@@ -2,8 +2,8 @@
 """
 
 import sys
+import socket
 import OpenSSL.SSL
-
 
 class Connection(object):
 
