@@ -2,25 +2,7 @@
 """
 
 import sys
-from OpenSSL.SSL import *
-from OpenSSL.SSL import WantReadError
-from OpenSSL.SSL import WantWriteError
-from OpenSSL.SSL import WantX509LookupError
-from OpenSSL.SSL import ZeroReturnError
-from OpenSSL.SSL import SysCallError
-from OpenSSL.SSL import Connection as __Connection__
-try:
-    from gevent.socket import wait_read
-    from gevent.socket import wait_write
-    from gevent.socket import wait_readwrite
-except ImportError:
-    import select
-    def wait_read(fd, timeout):
-        return select.select([fd], [], [fd], timeout)
-    def wait_write(fd, timeout):
-        return select.select([fd], [fd], [fd], timeout)
-    def wait_readwrite(fd, timeout):
-        return select.select([fd], [fd], [fd], timeout)
+import OpenSSL.SSL
 
 
 class Connection(object):
