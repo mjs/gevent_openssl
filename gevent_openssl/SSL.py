@@ -5,7 +5,7 @@ import sys
 import socket
 import OpenSSL.SSL
 
-class SSLConnection(object):
+class Connection(object):
     """OpenSSL Connection Wapper"""
 
     def __init__(self, context, sock):
