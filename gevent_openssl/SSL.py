@@ -5,7 +5,8 @@ import sys
 import socket
 import OpenSSL.SSL
 
-class Connection(object):
+class SSLConnection(object):
+    """OpenSSL Connection Wapper"""
 
     def __init__(self, context, sock):
         self._context = context
@@ -17,7 +18,7 @@ class Connection(object):
         if attr not in ('_context', '_sock', '_connection', '_makefile_refs'):
             return getattr(self._connection, attr)
 
-    def __wait_sock_io(self, sock, io_func, *args, **kwargs):
+    def __iowait(self, io_func, *args, **kwargs):
         timeout = self._sock.gettimeout() or 0.1
         fd = self._sock.fileno()
         while True:
@@ -40,14 +41,14 @@ class Connection(object):
         return client, addr
 
     def do_handshake(self):
-        return self.__wait_sock_io(self._sock, self._connection.do_handshake)
+        return self.__iowait(self._connection.do_handshake)
 
     def connect(self, *args, **kwargs):
-        return self.__wait_sock_io(self._sock, self._connection.connect, *args, **kwargs)
+        return self.__iowait(self._connection.connect, *args, **kwargs)
 
     def send(self, data, flags=0):
         try:
-            return self.__wait_sock_io(self._sock, self._connection.send, data, flags)
+            return self.__iowait(self._connection.send, data, flags)
         except OpenSSL.SSL.SysCallError as e:
             if e[0] == -1 and not data:
                 # errors when writing empty strings are expected and can be ignored
@@ -59,9 +60,14 @@ class Connection(object):
         if pending:
             return self._connection.recv(min(pending, bufsiz))
         try:
-            return self.__wait_sock_io(self._sock, self._connection.recv, bufsiz, flags)
+            return self.__iowait(self._connection.recv, bufsiz, flags)
         except OpenSSL.SSL.ZeroReturnError:
             return ''
+        except OpenSSL.SSL.SysCallError as e:
+            if e[0] == -1 and 'Unexpected EOF' in e[1]:
+                # errors when reading empty strings are expected and can be ignored
+                return ''
+            raise
 
     def read(self, bufsiz, flags=0):
         return self.recv(bufsiz, flags)
