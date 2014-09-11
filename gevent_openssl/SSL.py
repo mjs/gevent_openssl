@@ -1,9 +1,11 @@
 """gevent_openssl.SSL - gevent compatibility with OpenSSL.SSL.
 """
 
-import sys
-import socket
 import OpenSSL.SSL
+import select
+import socket
+import sys
+
 
 class Connection(object):
     """OpenSSL Connection Wapper"""
