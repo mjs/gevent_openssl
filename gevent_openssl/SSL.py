@@ -2,6 +2,7 @@
 """
 
 import OpenSSL.SSL
+import select
 import socket
 import sys
 
