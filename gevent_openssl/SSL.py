@@ -6,15 +6,17 @@ import select
 import socket
 import sys
 
-__real_connection = OpenSSL.SSL.Connection
+_real_connection = OpenSSL.SSL.Connection
 
 class Connection(object):
     """OpenSSL Connection Wapper"""
 
+    _reverse_mapping = _real_connection._reverse_mapping
+
     def __init__(self, context, sock):
         self._context = context
         self._sock = sock
-        self._connection = __real_connection(context, sock)
+        self._connection = _real_connection(context, sock)
         self._makefile_refs = 0
 
     def __getattr__(self, attr):
