@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='gevent_openssl',
-    version='1.0',
+    version='1.1',
     description='A gevent wrapper for pyOpenSSL',
     author='Menno Finlay-Smits',
     author_email='menno@freshfoo.com',
