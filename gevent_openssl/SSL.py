@@ -1,4 +1,4 @@
-"""gevent_openssl.SSL - gevent compatibility with OpenSSL.SSL.
+"""gevent_openssl.SSL - gevent compatibility with OpenSSL.SSL (pyOpenSSL)
 """
 
 import OpenSSL.SSL
@@ -9,7 +9,8 @@ import sys
 _real_connection = OpenSSL.SSL.Connection
 
 class Connection(object):
-    """OpenSSL Connection Wapper"""
+    """OpenSSL Connection wrapper
+    """
 
     _reverse_mapping = _real_connection._reverse_mapping
 
