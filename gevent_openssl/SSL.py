@@ -8,6 +8,7 @@ import sys
 
 _real_connection = OpenSSL.SSL.Connection
 
+
 class Connection(object):
     """OpenSSL Connection wrapper
     """
@@ -57,7 +58,8 @@ class Connection(object):
             return self.__iowait(self._connection.send, data, flags)
         except OpenSSL.SSL.SysCallError as e:
             if e[0] == -1 and not data:
-                # errors when writing empty strings are expected and can be ignored
+                # errors when writing empty strings are expected and can be
+                # ignored
                 return 0
             raise
 
@@ -71,7 +73,8 @@ class Connection(object):
             return ''
         except OpenSSL.SSL.SysCallError as e:
             if e[0] == -1 and 'Unexpected EOF' in e[1]:
-                # errors when reading empty strings are expected and can be ignored
+                # errors when reading empty strings are expected and can be
+                # ignored
                 return ''
             raise
 
