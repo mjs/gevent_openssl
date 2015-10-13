@@ -2,9 +2,8 @@
 """
 
 import OpenSSL.SSL
-import select
 import socket
-import sys
+from gevent.socket import wait_read, wait_write
 
 _real_connection = OpenSSL.SSL.Connection
 
@@ -26,21 +25,15 @@ class Connection(object):
             return getattr(self._connection, attr)
 
     def __iowait(self, io_func, *args, **kwargs):
-        timeout = self._sock.gettimeout() or 0.1
         fd = self._sock.fileno()
+        timeout = self._sock.gettimeout()
         while True:
             try:
                 return io_func(*args, **kwargs)
             except (OpenSSL.SSL.WantReadError, OpenSSL.SSL.WantX509LookupError):
-                sys.exc_clear()
-                _, _, errors = select.select([fd], [], [fd], timeout)
-                if errors:
-                    break
+                wait_read(fd, timeout=timeout)
             except OpenSSL.SSL.WantWriteError:
-                sys.exc_clear()
-                _, _, errors = select.select([], [fd], [fd], timeout)
-                if errors:
-                    break
+                wait_write(fd, timeout=timeout)
 
     def accept(self):
         sock, addr = self._sock.accept()
