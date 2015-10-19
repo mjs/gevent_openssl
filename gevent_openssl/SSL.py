@@ -21,8 +21,7 @@ class Connection(object):
         self._makefile_refs = 0
 
     def __getattr__(self, attr):
-        if attr not in ('_context', '_sock', '_connection', '_makefile_refs'):
-            return getattr(self._connection, attr)
+        return getattr(self._connection, attr)
 
     def __iowait(self, io_func, *args, **kwargs):
         fd = self._sock.fileno()
