@@ -36,7 +36,7 @@ class Connection(object):
 
     def accept(self):
         sock, addr = self._sock.accept()
-        client = OpenSSL.SSL.Connection(sock._context, sock)
+        client = OpenSSL.SSL.Connection(self._context, sock)
         return client, addr
 
     def do_handshake(self):
