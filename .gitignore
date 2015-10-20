@@ -1,4 +1,4 @@
-
 .project
-
 .pydevproject
+*.pyc
+gevent_openssl.egg-info
