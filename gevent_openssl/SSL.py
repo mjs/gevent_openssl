@@ -18,7 +18,6 @@ class Connection(object):
         self._context = context
         self._sock = sock
         self._connection = _real_connection(context, sock)
-        self._makefile_refs = 0
 
     def __getattr__(self, attr):
         return getattr(self._connection, attr)
@@ -68,21 +67,3 @@ class Connection(object):
                 # ignored
                 return ''
             raise
-
-    def read(self, bufsiz, flags=0):
-        return self.recv(bufsiz, flags)
-
-    def write(self, buf, flags=0):
-        return self.sendall(buf, flags)
-
-    def close(self):
-        if self._makefile_refs < 1:
-            self._connection = None
-            if self._sock:
-                socket.socket.close(self._sock)
-        else:
-            self._makefile_refs -= 1
-
-    def makefile(self, mode='r', bufsize=-1):
-        self._makefile_refs += 1
-        return socket._fileobject(self, mode, bufsize, close=True)
