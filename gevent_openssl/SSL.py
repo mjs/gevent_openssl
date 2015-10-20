@@ -2,7 +2,6 @@
 """
 
 import OpenSSL.SSL
-import socket
 from gevent.socket import wait_read, wait_write
 
 _real_connection = OpenSSL.SSL.Connection
@@ -44,8 +43,14 @@ class Connection(object):
         return self.__iowait(self._connection.connect, *args, **kwargs)
 
     def send(self, data, flags=0):
+        return self.__send(self._connection.send, data, flags)
+
+    def sendall(self, data, flags=0):
+        return self.__send(self._connection.sendall, data, flags)
+
+    def __send(self, send_method, data, flags=0):
         try:
-            return self.__iowait(self._connection.send, data, flags)
+            return self.__iowait(send_method, data, flags)
         except OpenSSL.SSL.SysCallError as e:
             if e[0] == -1 and not data:
                 # errors when writing empty strings are expected and can be
@@ -67,3 +72,6 @@ class Connection(object):
                 # ignored
                 return ''
             raise
+
+    def shutdown(self):
+        return self.__iowait(self._connection.shutdown)

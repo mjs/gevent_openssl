@@ -20,7 +20,7 @@ def lame_connection_test():
     connection = SSL.Connection(context, sock)
     connection.set_connect_state()
     connection.do_handshake() # XXX not needed?
-    connection.send('GET / HTTP/1.1\r\n\r\n')
+    connection.sendall('GET / HTTP/1.1\r\n\r\n')
     resp = connection.recv(1024)
     if "The document has moved" in resp:
         print("Connection test OK")
@@ -30,7 +30,7 @@ def lame_connection_test():
 
 def lame_timeout_test():
     context = SSL.Context(SSL.TLSv1_METHOD)
-    sock = socket.create_connection(('slashdot.org', 80), timeout=2)
+    sock = socket.create_connection(('slashdot.org', 80), timeout=1)
     connection = SSL.Connection(context, sock)
     connection.set_connect_state() # XXX not needed?
     t0 = time.time()
@@ -46,11 +46,9 @@ def here(p):
 
 def lame_server_test():
     context = SSL.Context(SSL.TLSv1_METHOD)
-    context.set_verify(SSL.VERIFY_NONE, lambda _, __, ____, _____, ok: ok)
     context.use_privatekey_file(here('server.key'))
     context.use_certificate_file(here('server.cer'))
     context.load_verify_locations(here('root.cer'))
-
     server = SSL.Connection(context, socket.socket(socket.AF_INET, socket.SOCK_STREAM))
     server.bind(('localhost', 0))
     port = server.getsockname()[1]
@@ -60,14 +58,17 @@ def lame_server_test():
         conn, _ = server.accept()
         conn.set_accept_state()
         conn.send("foo")
+        conn.shutdown()
         conn.close()
         server.close()
 
     def run_client():
+        context = SSL.Context(SSL.TLSv1_METHOD)
         sock = socket.create_connection(('localhost', port), timeout=2)
         conn = SSL.Connection(context, sock)
         conn.set_connect_state()
         resp = conn.recv(32)
+        conn.shutdown()
         conn.close()
         print("Server test " + "OK" if resp == "foo" else "FAIL")
 
